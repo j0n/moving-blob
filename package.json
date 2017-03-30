@@ -1,0 +1,49 @@
+{
+  "name": "webgl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "cssjoin app/styles/main.css | autoprefixer -b 'last 2 versions' | cssmin > dist/main.css",
+    "build:html": "catw 'app/index.html' -o dist/index.html -v",
+    "serve": "http-server -p 9999 dist/",
+    "build:js": "browserify -t [ babelify --presets [ es2015 ]] app/scripts/main.js | uglifyjs > dist/main.js",
+    "watch:js": "watchify app/scripts/main.js -t [babelify --presets [es2015]] -o dist/main.js -vd ",
+    "watch:css": "nodemon --watch app/styles/ -e css -x \"npm run build:css\"",
+    "watch": "npm run serve & npm run watch:js & npm run build:html",
+    "build": "npm run build:html & npm run build:js",
+    "lint": "standard app/scripts/*.js",
+    "lint:fix": "standard app/scripts/*.js --fix",
+    "lol": "browserify -t [ babelify --presets [ es2015 ] ] app/scripts/main.js > yo.js "
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fps": "0.0.3",
+    "three": "^0.72.0"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify"
+      ]
+    ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^5.1.0",
+    "babel-cli": "^6.24.0",
+    "babel-eslint": "^7.2.1",
+    "babel-preset-es2016": "^6.22.0",
+    "babelify": "^7.3.0",
+    "browserify": "^14.1.0",
+    "catw": "^0.2.0",
+    "cssjoin": "^0.3.1",
+    "cssmin": "^0.4.3",
+    "eslint": "^3.18.0",
+    "http-server": "^0.8.0",
+    "nodemon": "^1.3.7",
+    "standard": "^9.0.2",
+    "uglifyjs": "^2.4.10",
+    "watchify": "^3.9.0"
+  }
+}
