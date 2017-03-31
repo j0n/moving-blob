@@ -1,76 +1,77 @@
-/*
-  This is a generic "ThreeJS Application"
-  helper which sets up a renderer and camera
-  controls.
- */
+/* global THREE */
 
 if (typeof global.THREE === 'undefined') {
-    window.THREE = require('three');
+  window.THREE = require('three')
 }
-// const createControls = require('orbit-controls');
+// var OrbitControls = require('three-orbit-controls')(THREE);
+const createControls = require('orbit-controls');
 
-module.exports = setup;
+module.exports = setup
+
 function setup (opt = {}) {
   // Scale for retina
-  const dpr = window.devicePixelRatio;
+  const dpr = window.devicePixelRatio
   // Our WebGL renderer with alpha and device-scaled
   const renderer = new THREE.WebGLRenderer(Object.assign({
     antialias: true // default enabled
-  }, opt));
-  renderer.setPixelRatio(dpr);
+  }, opt))
+  renderer.setClearColor(0xf0f0f0)
+  renderer.setPixelRatio(dpr)
 
   // Add the <canvas> to DOM body
-  const canvas = renderer.domElement;
+  const canvas = renderer.domElement
   // const base = document.getElementById(opt.div)
-  document.body.appendChild(canvas);
+  document.body.appendChild(canvas)
 
   // perspective camera
-  const near = 1;
-  const far = 1000;
-  const fieldOfView = 65;
+  const near = 1
+  const far = 3000
+  const fieldOfView = 65
 
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const aspect = width / height;
-  const camera = new THREE.PerspectiveCamera(fieldOfView, aspect, near, far);
-  const target = new THREE.Vector3();
-  camera.position.z = 3;
-  
-  renderer.setClearColor( 0xf0f0f0);
-  renderer.setPixelRatio( window.devicePixelRatio );
-  renderer.setSize( window.innerWidth, window.innerHeight );
-  
+  const width = window.innerWidth
+  const height = window.innerHeight
+  const aspect = width / height
+  const camera = new THREE.PerspectiveCamera(fieldOfView, aspect, near, far)
+  const target = new THREE.Vector3()
+  camera.position.z = 3
+
+  renderer.setClearColor(0xf0f0f0)
+  renderer.setPixelRatio(window.devicePixelRatio)
+  renderer.setSize(window.innerWidth, window.innerHeight)
+  // var controls = OrbitControls(camera, renderer.domElement);
 
   // 3D scene
-  const scene = new THREE.Scene();
+  const scene = new THREE.Scene()
+    /*
   var light = new THREE.PointLight(0xffffff, 10)
   light.position.set(10, 10, 30)
   scene.add(light)
   scene.add(new THREE.AmbientLight(0xacacac))
+  */
 
   // slick 3D orbit controller with damping
-    /*
-  const controls = createControls(Object.assign({
+  const controls = createControls({
     canvas,
     distanceBounds: [ 1, 10 ],
-    distance: 2.5,
-    phi: 70 * Math.PI / 180
-  }, opt)); */
+    distance: 1502.5,
+    phi: 90 * Math.PI / 180
+  }, opt);
 
   // Update renderer size
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', resize)
 
   // Setup initial size & aspect ratio
-  resize();
+  resize()
+  updateControls();
 
   return {
     camera,
     scene,
     renderer,
-    canvas
-  };
+    canvas,
+    controls
+  }
 
-    /*
   function updateControls () {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -87,16 +88,16 @@ function setup (opt = {}) {
     camera.aspect = aspect;
     camera.updateProjectionMatrix();
   }
-  */
+
 
   function resize () {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const aspect = width / height;
+    const width = window.innerWidth
+    const height = window.innerHeight
+    const aspect = width / height
     // Update camera matrices
-    camera.aspect = aspect;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    // updateControls();
+    camera.aspect = aspect
+    camera.updateProjectionMatrix()
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    updateControls();
   }
 }
