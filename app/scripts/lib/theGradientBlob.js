@@ -17,11 +17,11 @@ export default function () {
   });
   // var holes = [];
 
-  const verts = getVectors(50)
+  const verts = getVectors(100)
   var geometry = new THREE.Geometry();
 
   var triangles = getTriangles(verts)
-  console.log(triangles);
+  // console.log(triangles);
   var f = 0;
   for(var j = 0; j < triangles.length; j++){
     geometry.vertices.push(

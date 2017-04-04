@@ -5,7 +5,7 @@ import fps from 'fps'
 import setup from './lib/setup'
 import createRomb from './lib/createRomb'
 import sphere from './lib/colorSphere'
-import {default as triangle, animate as triangleAnimate} from './lib/triangle'
+import {default as triangle} from './lib/triangle'
 import {default as plane, animate as planeAnimate} from './lib/planeWithShader'
 import blob from './lib/theGradientBlob'
 
@@ -24,8 +24,8 @@ console.time();
 for (var k = 0; k < 50; k++) {
   points.push(
     new Delaunay.Point(
-      (Math.random() * 40)-20,
-      (Math.random() * 20)-10
+      (Math.random() * 45)-22.5,
+      (Math.random() * 30)-15
     )
   )
 }
@@ -33,19 +33,58 @@ const myPlane = plane();
 // scene.add(myPlane);
 var dtri = Delaunay.triangulate(points);
 
-console.log(dtri[0]);
-var dtris = [];
+// console.log(dtri);
+// var dtris = [];
+var blobPoints = {};
 for (var i = 0, ii = dtri.length; i < ii; i++) {
+  var blobPointKey1 = 'p_' + dtri[i].p1.x + '_' + dtri[i].p1.y;
+  var blobPointKey2 = 'p_' + dtri[i].p2.x + '_' + dtri[i].p2.y;
+  var blobPointKey3 = 'p_' + dtri[i].p3.x + '_' + dtri[i].p3.y;
+
   const tri = triangle(
     new THREE.Vector3(dtri[i].p1.x, dtri[i].p1.y, 1),
     new THREE.Vector3(dtri[i].p2.x, dtri[i].p2.y, 1),
     new THREE.Vector3(dtri[i].p3.x, dtri[i].p3.y, 1)
   )
-  dtris.push(tri);
+  if (typeof blobPoints[blobPointKey1] === 'undefined') {
+    console.log(tri);
+    blobPoints[blobPointKey1] = {
+      triangles: [tri],
+      point: {
+        x: dtri[i].p1.x,
+        y: dtri[i].p1.y
+      }
+    }
+  } else {
+    blobPoints[blobPointKey1].triangles.push(tri)
+  }
+  if (typeof blobPoints[blobPointKey2] === 'undefined') {
+    blobPoints[blobPointKey2] = {
+      triangles: [tri],
+      point: {
+        x: dtri[i].p2.x,
+        y: dtri[i].p2.y
+      }
+    }
+  } else {
+    blobPoints[blobPointKey2].triangles.push(tri)
+  }
+  if (typeof blobPoints[blobPointKey3] === 'undefined') {
+    blobPoints[blobPointKey3] = {
+      triangles: [tri],
+      point: {
+        x: dtri[i].p3.x,
+        y: dtri[i].p3.y
+      }
+    }
+  } else {
+    blobPoints[blobPointKey3].triangles.push(tri)
+  }
+
   scene.add(tri);
 }
+console.log('blobPoints', blobPoints);
 console.timeEnd();
-
 
 
 const clock = new THREE.Clock();
@@ -71,6 +110,30 @@ function animate () {
   sphereObj.rotation.z += 0.01;
   romb.rotation.z += 0.01;
   myPlane.rotation.z += 0.001;
+  for (var key in blobPoints) {
+    if (Math.random() > 0.5) {
+      var obj = blobPoints[key];
+      obj.newX = blobPoints[key].point.x + ((Math.random() - 0.5)/10);
+      obj.newY = blobPoints[key].point.y + ((Math.random() - 0.5)/10);
+      blobPoints[key].triangles.forEach((tri) => {
+        tri.geometry.vertices.forEach((vert) => {
+          // console.log(vert.x, obj.point.x);
+          if (vert.x === blobPoints[key].point.x && vert.y === blobPoints[key].point.y) {
+            // console.log('YO');
+            vert.x = obj.newX;
+            vert.y = obj.newY;
+          }
+        })
+
+        tri.geometry.colorsNeedUpdate = true;
+        tri.geometry.verticesNeedUpdate = true;
+      })
+      blobPoints[key].point = {
+        x: obj.newX,
+        y: obj.newY
+      }
+    }
+  }
 
   /*
   points = points.map((p) => {
@@ -79,10 +142,22 @@ function animate () {
       p.y + ((Math.random() - 0.5)/30)
     )
   }) */
-  var newTriangles = Delaunay.triangulate(points);
+
+  // var newTriangles = Delaunay.triangulate(points);
+
+  /*
+  var dtri2 = Delaunay.triangulate(points);
+  dtri.forEach((t) => {
+    dtri2.forEach((t2) => {
+      if (JSON.stringify(t) !== JSON.stringify(t2)) {
+        console.log('ident');
+      }
+    })
+  }) */
 
   planeAnimate(delta);
 
+  /*
   dtris.forEach((tri, index) => {
     if (newTriangles[index]) {
       triangleAnimate(tri, {
@@ -96,7 +171,7 @@ function animate () {
         y: newTriangles[index].p3.y
       }, index);
     }
-  })
+  }) */
   // controls.update();
   renderer.render(scene, camera)
   requestAnimationFrame(animate)
