@@ -14,10 +14,11 @@ export default function (
     vertexShader: require('./shaders/vert2.glsl')(),
     fragmentShader: require('./shaders/frag.glsl')()
   }); */
-  var material = new THREE.MeshBasicMaterial( {
-    color: 0xf0f0f0,
+  var material = new THREE.MeshPhongMaterial( {
+    color: 0xffffff,
     shading: THREE.FlatShading,
-    vertexColors: THREE.FaceColors
+    vertexColors: THREE.VertexColors,
+    shininess: 0
   });
   var verts = [];
   var holes = [];
@@ -29,23 +30,38 @@ export default function (
   geometry.vertices = verts;
 
   var triangles = THREE.ShapeUtils.triangulateShape(verts, holes);
-  for( var i = 0; i < triangles.length; i++ ){
+  for( var m = 0; m < triangles.length; m++ ){
     var face = new THREE.Face3(
-      triangles[i][0],
-      triangles[i][1],
-      triangles[i][2]
+      triangles[m][0],
+      triangles[m][1],
+      triangles[m][2]
     )
-    face.color.setRGB( Math.random(), Math.random(), Math.random())
     geometry.faces.push(face);
   }
-
-  geometry.center();
-  // geometry.scale(0.7, 0.7, 0.7);
   geometry.computeVertexNormals();
+  let radius = 10;
+  let color, p, vertexIndex;
+
+  var faceIndices = [ 'a', 'b', 'c' ];
+  for ( var i = 0; i < geometry.faces.length; i ++ ) {
+    var f = geometry.faces[ i ];
+    for( var j = 0; j < 3; j++ ) {
+      vertexIndex = f[ faceIndices[ j ] ];
+      p = geometry.vertices[ vertexIndex ];
+      color = new THREE.Color( 0xffffff );
+      color.setHSL( ( p.y / radius + 1 ) / 2, 1.0, 0.5 );
+      f.vertexColors[ j ] = color;
+    }
+  }
+
   return new THREE.Mesh(geometry, material);
 }
-export function animate (triangle, v1, v2, v3) {
+export function animate (triangle, v1, v2, v3, index) {
   var needsUpdate = false;
+  var vs = [v1, v2, v3];
+  vs.sort((a, b) => {
+    return a.y - b.y;
+  })
   triangle.geometry.vertices.forEach((v, index) => {
     if (typeof v1 !== 'undefined' && index == 0) {
       needsUpdate = true;
@@ -63,5 +79,24 @@ export function animate (triangle, v1, v2, v3) {
       v.y = v3.y;
     }
   })
+  // var radius = 10;
+  // var color, p, vertexIndex;
+  if (index === 20) {
+      // console.log(v1.y, v2.y, v3.y);
+  }
+
+  /*
+  var faceIndices = [ 'a', 'b', 'c' ];
+  for ( var i = 0; i < triangle.geometry.faces.length; i ++ ) {
+    var f = triangle.geometry.faces[i];
+    for(var j = 0; j < 3; j++) {
+      vertexIndex = f[faceIndices[j]];
+      p = triangle.geometry.vertices[vertexIndex];
+      color = new THREE.Color( 0xffffff );
+      color.setHSL( ( vs[0].y / 20) / 10, 1.0, 0.5 );
+      f.vertexColors[ j ] = color;
+    }
+  } */
+  triangle.geometry.colorsNeedUpdate = true;
   triangle.geometry.verticesNeedUpdate = needsUpdate;
 }

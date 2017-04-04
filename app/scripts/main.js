@@ -1,130 +1,106 @@
-import {setup} from './lib/setup';
-const fps = require('fps');
+/* eslint no-console:0 */
+/* global THREE */
+
+import fps from 'fps'
+import setup from './lib/setup'
+import createRomb from './lib/createRomb'
+import sphere from './lib/colorSphere'
+import {default as triangle, animate as triangleAnimate} from './lib/triangle'
+import {default as plane, animate as planeAnimate} from './lib/planeWithShader'
+import blob from './lib/theGradientBlob'
+
+if (typeof global.THREE === 'undefined') {
+  window.THREE = require('three')
+}
 var ticker = fps({
-    every: 10   // update every 10 frames
-});
+  every: 10   // update every 10 frames
+})
+import Delaunay from 'delaunay-triangulation'
 
-var THREE = require('three');
+var { camera, scene, renderer } = setup();
 
-// var Help = require('./lib/draw');
-// var CurveLines = require('./lib/curveLine');
-// var mouseCircle = require('./lib/mouseCircle');
-var moved = 50;
-var movingDirection = 'out';
-var rounds = 0;
-var opacityStrength = 0.1;
-var thresholds = {
-    max: 9,
-    min: 0.5
+var points  = [];
+console.time();
+for (var k = 0; k < 50; k++) {
+  points.push(
+    new Delaunay.Point(
+      (Math.random() * 40)-20,
+      (Math.random() * 20)-10
+    )
+  )
 }
+const myPlane = plane();
+// scene.add(myPlane);
+var dtri = Delaunay.triangulate(points);
 
-var stpos = {
-    x : 0,
-    y : 0,
-};
-var yo = {
-    x: 0,
-    y: 0
+console.log(dtri[0]);
+var dtris = [];
+for (var i = 0, ii = dtri.length; i < ii; i++) {
+  const tri = triangle(
+    new THREE.Vector3(dtri[i].p1.x, dtri[i].p1.y, 1),
+    new THREE.Vector3(dtri[i].p2.x, dtri[i].p2.y, 1),
+    new THREE.Vector3(dtri[i].p3.x, dtri[i].p3.y, 1)
+  )
+  dtris.push(tri);
+  scene.add(tri);
 }
-var zIndex = 15;
-var stop = false;
+console.timeEnd();
 
 
-// THREE.js setup
-var renderer = new THREE.WebGLRenderer({
-    precision: "mediump", devicePixelRatio:window.devicePixelRatio, antialias:true });
-document.body.appendChild( renderer.domElement );
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 65, window.innerWidth / window.innerHeight, 1, 1000 );
-camera.position.z = zIndex;
-renderer.setClearColor( 0xf0f0f0);
-renderer.setPixelRatio( window.devicePixelRatio );
-renderer.setSize( window.innerWidth, window.innerHeight );
 
-//var raycaster = new THREE.Raycaster();
-//var mouseVector = new THREE.Vector3();
+const clock = new THREE.Clock();
 
 
-window.s = scene;
+var light = new THREE.DirectionalLight(0xffffff );
+light.position.set(0, 0, 1 );
+scene.add(light);
 
-// mouseCircle.init(scene);
+// plane.position.x = -400;
+//
+const sphereObj = sphere();
+// scene.add(sphereObj);
+const romb = createRomb(0, 0, 4)
+// scene.add(romb);
+const myBlob = blob();
+scene.add(myBlob);
 
-var mouseDist = 1;
-var angle = 0;
-var color = 0x000000;
-var opacity = 0.15;
-CurveLines.addLine({x: 20, y: 0}, scene);
+function animate () {
+  ticker.tick()
+  const delta = clock.getDelta();
+  sphereObj.rotation.x += 0.01;
+  sphereObj.rotation.z += 0.01;
+  romb.rotation.z += 0.01;
+  myPlane.rotation.z += 0.001;
 
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-}
+  /*
+  points = points.map((p) => {
+    return new Delaunay.Point(
+      p.x + ((Math.random() - 0.5)/30),
+      p.y + ((Math.random() - 0.5)/30)
+    )
+  }) */
+  var newTriangles = Delaunay.triangulate(points);
 
-var fade = false;
-var steps = 0;
-var linesToFadeout = 0;
-var stepping = false;
-var steppingDist = 0;
+  planeAnimate(delta);
 
-function animate() {
-    moved++;
-
-    ticker.tick()
-    if (!stop) {
-        CurveLines.replaceLastPosition(yo);
-        CurveLines.draw();
+  dtris.forEach((tri, index) => {
+    if (newTriangles[index]) {
+      triangleAnimate(tri, {
+        x: newTriangles[index].p1.x,
+        y: newTriangles[index].p1.y
+      },{
+        x: newTriangles[index].p2.x,
+        y: newTriangles[index].p2.y
+      },{
+        x: newTriangles[index].p3.x,
+        y: newTriangles[index].p3.y
+      }, index);
     }
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
+  })
+  // controls.update();
+  renderer.render(scene, camera)
+  requestAnimationFrame(animate)
 }
-
-
-document.addEventListener('touchstart', function(ev) {
-    ev.stopPropagation();
-    ev.preventDefault();
-    var pos = {
-        x : ev.pageX,
-        y : ev.pageY
-    };
-    return false;
-});
-document.addEventListener('touchmove', function(ev) {
-    moved = 0;
-    var pos = {
-        x : (zIndex ) * ((ev.pageX / window.innerWidth ) * 2 - 1),
-        y : (zIndex ) * (-(ev.pageY / window.innerHeight ) * 2 + 1)
-    };
-    mouseDist = Help.dist(stpos, pos);
-});
-
-document.addEventListener('mousedown', function(ev) {
-     stop = !stop;
-     if (!stop) {
-        animate();
-     }
-});
-window.addEventListener( 'resize', onWindowResize, false );
-
-
-// fps fixer for devices with low cpus
-var lowFpsCounter = 0;
-var lowFpsThreshold = 40;
-ticker.on('data', function(fps) {
-    if (fps < lowFpsThreshold) {
-        lowFpsCounter++;
-        if (lowFpsCounter > 4) {
-            if (lowFpsThreshold > 7) {
-                lowFpsThreshold -= 5;
-            }
-            if (lowFpsThreshold < 30) {
-                opacityStrength = 0.2;
-            }
-            lowFpsCounter = 0;
-            CurveLines.lesserSegements();
-        }
-    }
-});
 
 // Start animating
-animate();
+animate()

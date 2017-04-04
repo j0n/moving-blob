@@ -52,7 +52,7 @@ function setup (opt = {}) {
   // slick 3D orbit controller with damping
   const controls = createControls({
     canvas,
-    distanceBounds: [ 1, 10 ],
+    distanceBounds: [ 1, 20 ],
     distance: 1502.5,
     phi: 90 * Math.PI / 180
   }, opt);
