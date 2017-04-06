@@ -42,18 +42,16 @@ function setup (opt = {}) {
 
   // 3D scene
   const scene = new THREE.Scene()
-    /*
-  var light = new THREE.PointLight(0xffffff, 10)
-  light.position.set(10, 10, 30)
+  var light = new THREE.DirectionalLight(0xffffff );
+  light.position.set(0, 0, 1)
   scene.add(light)
-  scene.add(new THREE.AmbientLight(0xacacac))
-  */
+  // scene.add(new THREE.AmbientLight(0xacacac))
 
   // slick 3D orbit controller with damping
   const controls = createControls({
     canvas,
     distanceBounds: [ 1, 20 ],
-    distance: 1502.5,
+    distance: 102.5,
     phi: 90 * Math.PI / 180
   }, opt);
 
