@@ -48,7 +48,7 @@ export default function (
     for( var j = 0; j < 3; j++ ) {
       vertexIndex = f[ faceIndices[ j ] ];
       p = geometry.vertices[ vertexIndex ];
-      color = new THREE.Color( 0xffffff );
+      color = new THREE.Color( 0xffff00 );
       color.setHSL( ( p.y / radius + 1 ) / 2, 1.0, 0.5 );
       f.vertexColors[ j ] = color;
     }
