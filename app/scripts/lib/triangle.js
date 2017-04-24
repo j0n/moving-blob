@@ -9,15 +9,16 @@ export default function (
     v2 = new THREE.Vector3(2, 0, 0),
     v3 = new THREE.Vector3(2, 2, 0)) {
     // Create our vertex/fragment shaders
+
   /*
-  const myOwnmaterial = new THREE.RawShaderMaterial({
+  const material = new THREE.RawShaderMaterial({
     vertexShader: require('./shaders/vert2.glsl')(),
     fragmentShader: require('./shaders/frag.glsl')()
-  }); */
+  });
+  */
   var material = new THREE.MeshPhongMaterial( {
     color: 0xffffff,
-    shading: THREE.FlatShading,
-    vertexColors: THREE.VertexColors,
+    vertexColors: THREE.FaceColors,
     shininess: 0
   });
   var verts = [];
@@ -39,7 +40,7 @@ export default function (
     geometry.faces.push(face);
   }
   geometry.computeVertexNormals();
-  let radius = 10;
+  let radius = 2;
   let color, p, vertexIndex;
 
   var faceIndices = [ 'a', 'b', 'c' ];
@@ -48,11 +49,20 @@ export default function (
     for( var j = 0; j < 3; j++ ) {
       vertexIndex = f[ faceIndices[ j ] ];
       p = geometry.vertices[ vertexIndex ];
-      color = new THREE.Color( 0xffff00 );
-      color.setHSL( ( p.y / radius + 1 ) / 2, 1.0, 0.5 );
+      color = new THREE.Color( 0xff0000 );
+      color.setRGB((Math.random() / radius) + 0.4, 0.2, 0.3);// setHSL( ( p.y / radius + 1 ) / 2, 1.0, 0.5 );
       f.vertexColors[ j ] = color;
+      // f.opacity = 0.2;//1 - ((Math.random()/100) + v1.x);
     }
   }
+  material.transparent = true;
+  console.log(v1.y/20);
+  if (v1.y < 0.3) {
+    material.opacity = 1;// - (v1.y / 1);//(Math.random()/50);//1 - ((v1.x*105)/60);
+  } else {
+    // material.opacity = 0;
+  }
+  material.opacity = 1;
 
   return new THREE.Mesh(geometry, material);
 }

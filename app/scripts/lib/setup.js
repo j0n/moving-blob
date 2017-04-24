@@ -4,7 +4,7 @@ if (typeof global.THREE === 'undefined') {
   window.THREE = require('three')
 }
 // var OrbitControls = require('three-orbit-controls')(THREE);
-const createControls = require('orbit-controls');
+// const createControls = require('orbit-controls');
 
 module.exports = setup
 
@@ -15,7 +15,7 @@ function setup (opt = {}) {
   const renderer = new THREE.WebGLRenderer(Object.assign({
     antialias: true // default enabled
   }, opt))
-  renderer.setClearColor(0xf0f0f0)
+  renderer.setClearColor(0xffffff)
   renderer.setPixelRatio(dpr)
 
   // Add the <canvas> to DOM body
@@ -32,10 +32,10 @@ function setup (opt = {}) {
   const height = window.innerHeight
   const aspect = width / height
   const camera = new THREE.PerspectiveCamera(fieldOfView, aspect, near, far)
-  const target = new THREE.Vector3()
+  // const target = new THREE.Vector3()
   camera.position.z = 3
 
-  renderer.setClearColor(0xf0f0f0)
+  renderer.setClearColor(0xffffff)
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(window.innerWidth, window.innerHeight)
   // var controls = OrbitControls(camera, renderer.domElement);
@@ -48,12 +48,14 @@ function setup (opt = {}) {
   // scene.add(new THREE.AmbientLight(0xacacac))
 
   // slick 3D orbit controller with damping
+  /*
   const controls = createControls({
     canvas,
     distanceBounds: [ 1, 20 ],
     distance: 102.5,
     phi: 90 * Math.PI / 180
   }, opt);
+  */
 
   // Update renderer size
   window.addEventListener('resize', resize)
@@ -66,8 +68,7 @@ function setup (opt = {}) {
     camera,
     scene,
     renderer,
-    canvas,
-    controls
+    canvas
   }
 
   function updateControls () {
@@ -76,11 +77,11 @@ function setup (opt = {}) {
     const aspect = width / height;
 
     // update camera controls
-    controls.update();
-    camera.position.fromArray(controls.position);
-    camera.up.fromArray(controls.up);
-    target.fromArray(controls.direction).add(camera.position);
-    camera.lookAt(target);
+    // controls.update();
+    // camera.position.fromArray(controls.position);
+    // camera.up.fromArray(controls.up);
+    // target.fromArray(controls.direction).add(camera.position);
+    // camera.lookAt(target);
 
     // Update camera matrices
     camera.aspect = aspect;
