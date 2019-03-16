@@ -1,5 +1,20 @@
 /* eslint no-console:0 */
 /* global THREE */
+import colorMix from 'color-mix'
+import Please from 'pleasejs'
+import {distance} from './utils'
+
+
+const redColors = Please.make_scheme(
+  {
+    h: 220,
+    s: .7,
+    v: .75
+  },
+  {
+    scheme: 'tri',
+    format: 'rgb'
+  });
 
 if (typeof global.THREE === 'undefined') {
   window.THREE = require('three')
@@ -18,14 +33,11 @@ export default function (
   */
   var material = new THREE.MeshPhongMaterial( {
     color: 0xffffff,
-    vertexColors: THREE.FaceColors,
+    vertexColors: THREE.VertexColors,
     shininess: 0
   });
-  var verts = [];
+  var verts = [v1, v2, v3];
   var holes = [];
-  verts.push(v1);
-  verts.push(v2);
-  verts.push(v3);
 
   var geometry = new THREE.Geometry();
   geometry.vertices = verts;
@@ -40,23 +52,23 @@ export default function (
     geometry.faces.push(face);
   }
   geometry.computeVertexNormals();
-  let radius = 2;
-  let color, p, vertexIndex;
-
-  var faceIndices = [ 'a', 'b', 'c' ];
+  // let radius = 2;
+  // var faceIndices = [ 'a', 'b', 'c' ];
   for ( var i = 0; i < geometry.faces.length; i ++ ) {
     var f = geometry.faces[ i ];
     for( var j = 0; j < 3; j++ ) {
-      vertexIndex = f[ faceIndices[ j ] ];
-      p = geometry.vertices[ vertexIndex ];
-      color = new THREE.Color( 0xff0000 );
-      color.setRGB((Math.random() / radius) + 0.4, 0.2, 0.3);// setHSL( ( p.y / radius + 1 ) / 2, 1.0, 0.5 );
-      f.vertexColors[ j ] = color;
-      // f.opacity = 0.2;//1 - ((Math.random()/100) + v1.x);
+      var v = distance(verts[j], {x: 0, y: 0})/10;
+      const color = redColors[
+        Math.floor(Math.random() * redColors.length)
+      ];
+      // vertexIndex = f[ faceIndices[ j ] ];
+      // p = geometry.vertices[ vertexIndex ];
+      const setColor = new THREE.Color();
+      setColor.setRGB((color.r/255) + v, color.g/255 + v, color.b/255 + v);
+      f.vertexColors[ j ] = setColor;
     }
   }
   material.transparent = true;
-  console.log(v1.y/20);
   if (v1.y < 0.3) {
     material.opacity = 1;// - (v1.y / 1);//(Math.random()/50);//1 - ((v1.x*105)/60);
   } else {
@@ -109,4 +121,20 @@ export function animate (triangle, v1, v2, v3, index) {
   } */
   triangle.geometry.colorsNeedUpdate = true;
   triangle.geometry.verticesNeedUpdate = needsUpdate;
+}
+export function changeColor (triangle, goalColors) {
+  var geometry = triangle.geometry;
+  for ( var i = 0; i < geometry.faces.length; i ++ ) {
+    var f = geometry.faces[ i ];
+    f.vertexColors.forEach((col, index) => {
+      if (index === 0) {
+        const value = col.r > 0.9 ? -0.005 : 0.005;
+        col.setRGB(
+          col.r + value,
+          col.g + value,
+          col.b + value)
+      }
+    })
+    triangle.geometry.colorsNeedUpdate = true;
+  }
 }

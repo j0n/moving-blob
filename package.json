@@ -25,8 +25,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "color-mix": "^0.4.0",
+    "color-scheme": "0.0.5",
     "delaunay-triangulation": "^2.0.0",
-    "three": "^0.84.0"
+    "matter-js": "^0.14.2",
+    "pleasejs": "^0.4.2",
+    "three": "^0.84.0",
+    "tween.js": "^16.6.0"
   },
   "devDependencies": {
     "autoprefixer": "^5.1.0",

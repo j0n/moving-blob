@@ -1,8 +1,5 @@
 import Matter from 'matter-js'
 export default function (p1, p2, p3) {
-  // var a = Matter.Bodies.circle(p1.x, p1.y, 5);
-  // var b = Matter.Bodies.circle(p2.x, p2.y, 5);
-  // var c = Matter.Bodies.circle(p3.x, p3.y, 5);
   var c1 = Matter.Constraint.create({
     bodyA: p1,
     bodyB: p2,

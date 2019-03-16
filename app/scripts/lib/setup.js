@@ -68,7 +68,8 @@ function setup (opt = {}) {
     camera,
     scene,
     renderer,
-    canvas
+    canvas,
+    light
   }
 
   function updateControls () {

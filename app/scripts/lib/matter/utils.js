@@ -1,20 +1,13 @@
 /* eslint no-console:0 */
-/* global THREE */
+
 import Matter from 'matter-js'
 import {default as matterTriangle, checkStatic} from './triangle'
 import {default as triangle} from '../triangle'
 import Delaunay from 'delaunay-triangulation'
+import {convertPoint} from '../utils';
 
 export function toWorld(camera, x, y) {
-  var vector = new THREE.Vector3();
-  vector.set(
-        (x / window.innerWidth) * 2 - 1,
-        - (y / window.innerHeight) * 2 + 1,
-        1);
-  vector.unproject( camera );
-  var dir = vector.sub( camera.position ).normalize();
-  var distance = - camera.position.z / dir.z;
-  return camera.position.clone().add( dir.multiplyScalar( distance ) );
+  return convertPoint(camera, x, y);
 }
 
 
@@ -146,7 +139,7 @@ export function getPoints () {
     new Delaunay.Point(margin, fixedH),
     new Delaunay.Point(margin, fixedH/2)
   ]
-  for (var k = 0; k < 30; k++) {
+  for (var k = 0; k < 10; k++) {
     points.push(
       new Delaunay.Point(
         (Math.random() * width),
